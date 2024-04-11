@@ -25,12 +25,15 @@ type Service struct {
 }
 
 func CreateService(cfg *Config) *Service {
-	return &Service{
+	service := &Service{
 		isInit: false,
 		cfg:    cfg,
 		Logger: slog.Default(),
 		Engine: gin.New(),
 	}
+
+	service.Init()
+	return service
 }
 
 func (s *Service) Gin() *gin.Engine {
@@ -55,10 +58,10 @@ func (s *Service) WithLogger(log *slog.Logger) {
 	s.Logger = log.With("service", "http")
 }
 
-func (s *Service) Start() error {
+func (s *Service) Start() {
 	s.Logger.Info("Start HTTP Service.")
 	if !s.isInit {
-		return fmt.Errorf("HTTP Service is not init.")
+		panic("HTTP Service is not init.")
 	}
 	addr := s.ServiceAddress()
 
@@ -75,8 +78,6 @@ func (s *Service) Start() error {
 	s.Logger.Info("HTTP Server is listen.", slog.String("Listen", s.Addr))
 
 	s.Logger.Info("HTTP Server is started.")
-
-	return nil
 }
 
 func (s *Service) ServiceAddress() string {
@@ -84,7 +85,7 @@ func (s *Service) ServiceAddress() string {
 }
 
 // TODO: finish stop func
-func (s *Service) Close() error {
+func (s *Service) Close() {
 	s.Logger.Info("Stop HTTP Service.")
-	return nil
+	return
 }
