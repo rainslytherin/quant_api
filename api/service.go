@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	sloggin "github.com/samber/slog-gin"
 )
 
 func init() {
@@ -56,6 +57,7 @@ func (s *Service) InitGin() {
 
 func (s *Service) WithLogger(log *slog.Logger) {
 	s.Logger = log.With("service", "http")
+	s.Engine.Use(sloggin.New(s.Logger))
 }
 
 func (s *Service) Start() {
