@@ -33,7 +33,7 @@ func (s *Service) hello(c *gin.Context) {
 }
 
 type CloseOut struct {
-	StockCode string `json:"stock_code"`
+	StockCode string `json:"stock_code"  binding:"required"`
 }
 
 func (s *Service) closeOut(c *gin.Context) {
@@ -41,6 +41,13 @@ func (s *Service) closeOut(c *gin.Context) {
 	if err := c.ShouldBindJSON(&closeOut); err != nil {
 		c.JSON(400, gin.H{
 			"message": "参数错误",
+		})
+		return
+	}
+
+	if closeOut.StockCode == "" {
+		c.JSON(400, gin.H{
+			"message": "stock_code 不能为空",
 		})
 		return
 	}
@@ -129,14 +136,14 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 }
 
 type StockConfig struct {
-	StockCode string `json:"stock_code"`
+	StockCode string `json:"stock_code"  binding:"required"`
 	Config    struct {
 		ProdStatus bool    `json:"prod_status,omitempty"`
 		PreStatus  bool    `json:"pre_status,omitempty"`
 		UpLimit    float64 `json:"up_limit,omitempty"`
 		LowLimit   float64 `json:"low_limit,omitempty"`
 	} `json:"config"`
-	UpdateUser string `json:"update_user"`
+	UpdateUser string `json:"update_user"  binding:"required"`
 }
 
 // AddStockConfig
