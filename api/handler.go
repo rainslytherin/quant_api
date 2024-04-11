@@ -129,9 +129,14 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 }
 
 type StockConfig struct {
-	StockCode  string                 `json:"stock_code"`
-	Config     map[string]interface{} `json:"config"`
-	UpdateUser string                 `json:"update_user"`
+	StockCode string `json:"stock_code"`
+	Config    struct {
+		ProdStatus bool    `json:"prod_status"`
+		PreStatus  bool    `json:"pre_status"`
+		UpLimit    float64 `json:"up_limit"`
+		LowLimit   float64 `json:"low_limit"`
+	} `json:"config"`
+	UpdateUser string `json:"update_user"`
 }
 
 // AddStockConfig
@@ -162,7 +167,7 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 		return
 	}
 
-	scopeConfig := models.NewConfig(scope, stockConfig.StockCode, value, "admin")
+	scopeConfig := models.NewConfig(scope, stockConfig.StockCode, value, stockConfig.UpdateUser)
 	if err := scopeConfig.Create(); err != nil {
 		c.JSON(400, gin.H{
 			"message": "添加失败: " + err.Error(),
@@ -210,6 +215,8 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 		})
 		return
 	}
+
+	oldConfig.UpdateUser = stockConfig.UpdateUser
 
 	if err := oldConfig.Save(); err != nil {
 		c.JSON(400, gin.H{
