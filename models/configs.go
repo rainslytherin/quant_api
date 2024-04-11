@@ -25,8 +25,8 @@ type Config struct {
 	ID           int    `db:"id"`
 	Scope        string `db:"scope"`
 	Name         string `db:"name"`
-	Value        []byte `db:"value"`
-	ChangedValue []byte `db:"changed_value"`
+	Value        string `db:"value"`
+	ChangedValue string `db:"changed_value"`
 	CreateTime   string `db:"create_time"`
 	UpdateTime   string `db:"update_time"`
 	UpdateUser   string `db:"update_user"`
@@ -36,19 +36,19 @@ func NewConfig(scope, name string, value []byte, updateUser string) *Config {
 	return &Config{
 		Scope:      scope,
 		Name:       name,
-		Value:      value,
+		Value:      string(value),
 		UpdateUser: updateUser,
 	}
 }
 
-func MergeJson(oldValue, newValue []byte) ([]byte, error) {
+func MergeJson(oldValueByte, newValueByte []byte) ([]byte, error) {
 	oldObj := make(map[string]interface{})
 	newObj := make(map[string]interface{})
-	if err := json.Unmarshal(oldValue, &oldObj); err != nil {
+	if err := json.Unmarshal(oldValueByte, &oldObj); err != nil {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(newValue, &newObj); err != nil {
+	if err := json.Unmarshal(newValueByte, &newObj); err != nil {
 		return nil, err
 	}
 
@@ -65,24 +65,24 @@ func MergeJson(oldValue, newValue []byte) ([]byte, error) {
 }
 
 func (c *Config) MergeValue(value []byte) error {
-	if c.ChangedValue == nil {
-		c.ChangedValue = []byte("{}")
+	if c.ChangedValue == "" {
+		c.ChangedValue = "{}"
 	}
-	if c.Value == nil {
-		c.Value = []byte("{}")
+	if c.Value == "" {
+		c.Value = "{}"
 	}
-	mergedChangeValue, err := MergeJson(c.ChangedValue, value)
+	mergedChangeValue, err := MergeJson([]byte(c.ChangedValue), value)
 	if err != nil {
 		return err
 	}
 
-	mergedValue, err := MergeJson(c.Value, value)
+	mergedValue, err := MergeJson([]byte(c.Value), value)
 	if err != nil {
 		return err
 	}
 
-	c.ChangedValue = mergedChangeValue
-	c.Value = mergedValue
+	c.ChangedValue = string(mergedChangeValue)
+	c.Value = string(mergedValue)
 
 	return nil
 }
