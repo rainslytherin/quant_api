@@ -127,7 +127,7 @@ func (c *Config) Create() error {
 
 	valueStr, _ := json.Marshal(c.Value)
 
-	_, err = db.Exec("INSERT INTO configs(scope, name, value, changed_value update_user) VALUES(?, ?, ?,?, ?)", c.Scope, c.Name, valueStr, valueStr, c.UpdateUser)
+	_, err = db.Exec("INSERT INTO configs(scope, name, value, changed_value, update_user) VALUES(?, ?, ?, ?, ?)", c.Scope, c.Name, valueStr, valueStr, c.UpdateUser)
 
 	return err
 }
