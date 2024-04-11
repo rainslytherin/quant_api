@@ -38,7 +38,7 @@ type CloseOut struct {
 
 func (s *Service) closeOut(c *gin.Context) {
 	var closeOut CloseOut
-	if err := c.ShouldBindJSON(closeOut); err != nil {
+	if err := c.ShouldBindJSON(&closeOut); err != nil {
 		c.JSON(400, gin.H{
 			"message": "参数错误",
 		})
