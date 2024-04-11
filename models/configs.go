@@ -1,11 +1,9 @@
 package models
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"quant_api/database"
-
-	"github.com/RaveNoX/go-jsonmerge"
 )
 
 /*
@@ -44,13 +42,26 @@ func NewConfig(scope, name string, value []byte, updateUser string) *Config {
 }
 
 func MergeJson(oldValue, newValue []byte) ([]byte, error) {
-	fmt.Println("oldValue", string(oldValue), "newValue", string(newValue))
-	merged, info, err := jsonmerge.MergeBytes(oldValue, newValue)
-	fmt.Println("merged", string(merged), "info", info, "err", err)
+	oldObj := make(map[string]interface{})
+	newObj := make(map[string]interface{})
+	if err := json.Unmarshal(oldValue, &oldObj); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(newValue, &newObj); err != nil {
+		return nil, err
+	}
+
+	for k, v := range newObj {
+		oldObj[k] = v
+	}
+
+	mergedValue, err := json.Marshal(oldObj)
 	if err != nil {
 		return nil, err
 	}
-	return merged, nil
+
+	return mergedValue, nil
 }
 
 func (c *Config) MergeValue(value []byte) error {
@@ -72,10 +83,6 @@ func (c *Config) MergeValue(value []byte) error {
 
 	c.ChangedValue = mergedChangeValue
 	c.Value = mergedValue
-
-	fmt.Println("value", string(value))
-	fmt.Println("c.ChangedValue", string(c.ChangedValue))
-	fmt.Println("c.Value", string(c.Value))
 
 	return nil
 }
