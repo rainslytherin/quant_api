@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  quant_api:
+    build: .
+    ports:
+      - "4320:4320"
+    restart: always
