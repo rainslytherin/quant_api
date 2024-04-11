@@ -132,7 +132,7 @@ func GetConfigs(scope string) ([]*Config, error) {
 	}
 
 	configs := make([]*Config, 0)
-	err = db.Select(&configs, "SELECT * FROM configs WHERE scope = ? AND is_deleted = 0", scope)
+	err = db.Select(&configs, "SELECT * FROM configs WHERE scope = ?", scope)
 
 	return configs, err
 }
