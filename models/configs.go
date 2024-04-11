@@ -57,11 +57,10 @@ func (pc *JsonObject) Value() (driver.Value, error) {
 
 func NewConfig(scope, name string, value map[string]interface{}, updateUser string) *Config {
 	return &Config{
-		Scope:        scope,
-		Name:         name,
-		Value:        value,
-		ChangedValue: value,
-		UpdateUser:   updateUser,
+		Scope:      scope,
+		Name:       name,
+		Value:      value,
+		UpdateUser: updateUser,
 	}
 }
 
@@ -126,7 +125,9 @@ func (c *Config) Create() error {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO configs(scope, name, value, update_user) VALUES(?, ?, ?, ?)", c.Scope, c.Name, c.Value, c.UpdateUser)
+	valueStr, _ := json.Marshal(c.Value)
+
+	_, err = db.Exec("INSERT INTO configs(scope, name, value, changed_value update_user) VALUES(?, ?, ?,?, ?)", c.Scope, c.Name, valueStr, valueStr, c.UpdateUser)
 
 	return err
 }
@@ -138,7 +139,10 @@ func (c *Config) Save() error {
 		return err
 	}
 
-	_, err = db.Exec("UPDATE configs SET changed_value = ?, value = ?, update_user = ? WHERE scope = ? AND name = ?", c.ChangedValue, c.Value, c.UpdateUser, c.Scope, c.Name)
+	valueStr, _ := json.Marshal(c.Value)
+	changeValueStr, _ := json.Marshal(c.ChangedValue)
+
+	_, err = db.Exec("UPDATE configs SET changed_value = ?, value = ?, update_user = ? WHERE scope = ? AND name = ?", changeValueStr, valueStr, c.UpdateUser, c.Scope, c.Name)
 
 	return err
 }
