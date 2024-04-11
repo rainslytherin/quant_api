@@ -1,7 +1,10 @@
 package models
 
 import (
+	"database/sql/driver"
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	"quant_api/database"
 )
@@ -22,22 +25,43 @@ CREATE TABLE `configs` (
 */
 
 type Config struct {
-	ID           int    `db:"id"`
-	Scope        string `db:"scope"`
-	Name         string `db:"name"`
-	Value        string `db:"value"`
-	ChangedValue string `db:"changed_value"`
-	CreateTime   string `db:"create_time"`
-	UpdateTime   string `db:"update_time"`
-	UpdateUser   string `db:"update_user"`
+	ID           int        `db:"id"`
+	Scope        string     `db:"scope"`
+	Name         string     `db:"name"`
+	Value        JsonObject `db:"value"`
+	ChangedValue JsonObject `db:"changed_value"`
+	CreateTime   string     `db:"create_time"`
+	UpdateTime   string     `db:"update_time"`
+	UpdateUser   string     `db:"update_user"`
 }
 
-func NewConfig(scope, name string, value []byte, updateUser string) *Config {
+type JsonObject map[string]interface{}
+
+func (pc *JsonObject) Scan(val interface{}) error {
+	switch v := val.(type) {
+	case []byte:
+		json.Unmarshal(v, &pc)
+		return nil
+	case string:
+		json.Unmarshal([]byte(v), &pc)
+		return nil
+	case nil:
+		return nil
+	default:
+		return errors.New(fmt.Sprintf("Unsupported type: %T", v))
+	}
+}
+func (pc *JsonObject) Value() (driver.Value, error) {
+	return json.Marshal(pc)
+}
+
+func NewConfig(scope, name string, value map[string]interface{}, updateUser string) *Config {
 	return &Config{
-		Scope:      scope,
-		Name:       name,
-		Value:      string(value),
-		UpdateUser: updateUser,
+		Scope:        scope,
+		Name:         name,
+		Value:        value,
+		ChangedValue: value,
+		UpdateUser:   updateUser,
 	}
 }
 
@@ -64,25 +88,23 @@ func MergeJson(oldValueByte, newValueByte []byte) ([]byte, error) {
 	return mergedValue, nil
 }
 
-func (c *Config) MergeValue(value []byte) error {
-	if c.ChangedValue == "" {
-		c.ChangedValue = "{}"
-	}
-	if c.Value == "" {
-		c.Value = "{}"
-	}
-	mergedChangeValue, err := MergeJson([]byte(c.ChangedValue), value)
-	if err != nil {
-		return err
+func MergeObject(oldObj, newObj map[string]interface{}) map[string]interface{} {
+	for k, v := range newObj {
+		oldObj[k] = v
 	}
 
-	mergedValue, err := MergeJson([]byte(c.Value), value)
-	if err != nil {
-		return err
-	}
+	return oldObj
+}
 
-	c.ChangedValue = string(mergedChangeValue)
-	c.Value = string(mergedValue)
+func (c *Config) MergeValue(value map[string]interface{}) error {
+	if c.ChangedValue == nil {
+		c.ChangedValue = make(map[string]interface{})
+	}
+	if c.Value == nil {
+		c.Value = make(map[string]interface{})
+	}
+	c.ChangedValue = MergeObject(c.ChangedValue, value)
+	c.Value = MergeObject(c.Value, value)
 
 	return nil
 }

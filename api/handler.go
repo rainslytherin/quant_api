@@ -131,10 +131,10 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 type StockConfig struct {
 	StockCode string `json:"stock_code"`
 	Config    struct {
-		ProdStatus bool    `json:"prod_status"`
-		PreStatus  bool    `json:"pre_status"`
-		UpLimit    float64 `json:"up_limit"`
-		LowLimit   float64 `json:"low_limit"`
+		ProdStatus bool    `json:"prod_status",omitempty`
+		PreStatus  bool    `json:"pre_status",omitempty`
+		UpLimit    float64 `json:"up_limit",omitempty`
+		LowLimit   float64 `json:"low_limit",omitempty`
 	} `json:"config"`
 	UpdateUser string `json:"update_user"`
 }
@@ -168,7 +168,16 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 		return
 	}
 
-	scopeConfig := models.NewConfig(scope, stockConfig.StockCode, value, stockConfig.UpdateUser)
+	var valueObject map[string]interface{}
+
+	if err := json.Unmarshal(value, &valueObject); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数格式错误",
+		})
+		return
+	}
+
+	scopeConfig := models.NewConfig(scope, stockConfig.StockCode, valueObject, stockConfig.UpdateUser)
 	if err := scopeConfig.Create(); err != nil {
 		c.JSON(400, gin.H{
 			"message": "添加失败: " + err.Error(),
@@ -203,6 +212,15 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 		return
 	}
 
+	var valueObject map[string]interface{}
+
+	if err := json.Unmarshal(value, &valueObject); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数格式错误",
+		})
+		return
+	}
+
 	oldConfig, err := models.GetConfig(scope, stockConfig.StockCode)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -211,7 +229,7 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 		return
 	}
 
-	if err := oldConfig.MergeValue(value); err != nil {
+	if err := oldConfig.MergeValue(valueObject); err != nil {
 		c.JSON(400, gin.H{
 			"message": "合并配置失败: " + err.Error(),
 		})
