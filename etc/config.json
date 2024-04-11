@@ -1,0 +1,16 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "http": {
+    "host": "127.0.0.1",
+    "port": 8080
+  },
+  "database": {
+    "host": "60.204.236.85",
+    "port": 3306,
+    "username": "root",
+    "password": "SecDev123!",
+    "database": "config_center"
+  }
+}
