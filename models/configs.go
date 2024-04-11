@@ -50,6 +50,12 @@ func MergeJson(oldValue, newValue []byte) ([]byte, error) {
 }
 
 func (c *Config) MergeValue(value []byte) error {
+	if c.ChangedValue == nil {
+		c.ChangedValue = []byte("{}")
+	}
+	if c.Value == nil {
+		c.Value = []byte("{}")
+	}
 	mergedChangeValue, err := MergeJson(c.ChangedValue, value)
 	if err != nil {
 		return err
