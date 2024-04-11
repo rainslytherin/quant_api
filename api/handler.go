@@ -33,7 +33,7 @@ func (s *Service) hello(c *gin.Context) {
 }
 
 type CloseOut struct {
-	StockCode string
+	StockCode string `json:"stock_code"`
 }
 
 func (s *Service) closeOut(c *gin.Context) {
