@@ -15,7 +15,7 @@ func (s *Service) InitHandlers() {
 	s.GET("/hello", s.hello)
 
 	// add close_out handler
-	s.POST("/close_out", s.closeOut)
+	s.POST("/stock/close_out", s.closeOut)
 
 	// add config update handler
 	s.GET("/stock/configs", s.GetStockConfigs)
