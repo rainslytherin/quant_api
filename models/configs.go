@@ -44,7 +44,8 @@ func NewConfig(scope, name string, value []byte, updateUser string) *Config {
 }
 
 func MergeJson(oldValue, newValue []byte) ([]byte, error) {
-	merged, _, err := jsonmerge.MergeBytes(oldValue, newValue)
+	merged, info, err := jsonmerge.MergeBytes(oldValue, newValue)
+	fmt.Println("merged", string(merged), "info", info, "err", err)
 	if err != nil {
 		return nil, err
 	}
