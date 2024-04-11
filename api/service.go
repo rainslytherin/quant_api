@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,6 +46,7 @@ func (s *Service) Init() {
 
 func (s *Service) InitGin() {
 	s.Engine.Use(gin.Recovery())
+	s.Engine.Use(cors.Default())
 	s.InitHandlers()
 	s.Server.Handler = s.Engine
 }
