@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"quant_api/database"
 
 	"github.com/RaveNoX/go-jsonmerge"
@@ -68,6 +70,10 @@ func (c *Config) MergeValue(value []byte) error {
 
 	c.ChangedValue = mergedChangeValue
 	c.Value = mergedValue
+
+	fmt.Println("value", string(value))
+	fmt.Println("c.ChangedValue", string(c.ChangedValue))
+	fmt.Println("c.Value", string(c.Value))
 
 	return nil
 }
