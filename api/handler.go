@@ -221,6 +221,13 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 		return
 	}
 
+	if len(valueObject) == 0 {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
 	oldConfig, err := models.GetConfig(scope, stockConfig.StockCode)
 	if err != nil {
 		c.JSON(400, gin.H{
