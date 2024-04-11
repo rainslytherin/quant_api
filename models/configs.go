@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"quant_api/database"
 
 	"github.com/RaveNoX/go-jsonmerge"
@@ -11,8 +13,8 @@ CREATE TABLE `configs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `scope` varchar(50) NOT NULL DEFAULT 'stock',
   `name` varchar(50) NOT NULL DEFAULT 'default_name',
-  `value` json NOT NULL,
-  `changed_value` json NOT NULL,
+  `value` json,
+  `changed_value` json,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `update_user` varchar(50) NOT NULL DEFAULT 'admin',
@@ -68,6 +70,10 @@ func (c *Config) MergeValue(value []byte) error {
 
 	c.ChangedValue = mergedChangeValue
 	c.Value = mergedValue
+
+	fmt.Println("value", string(value))
+	fmt.Println("c.ChangedValue", string(c.ChangedValue))
+	fmt.Println("c.Value", string(c.Value))
 
 	return nil
 }
