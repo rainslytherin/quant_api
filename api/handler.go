@@ -147,6 +147,13 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 		return
 	}
 
+	if stockConfig.StockCode == "" {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
 	value, err := json.Marshal(stockConfig.Config)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -223,6 +230,13 @@ func (s *Service) DeleteStockConfig(c *gin.Context) {
 	// 删除股票配置
 	var stockConfig StockConfig
 	if err := c.ShouldBindJSON(&stockConfig); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
+	if stockConfig.StockCode == "" {
 		c.JSON(400, gin.H{
 			"message": "参数错误",
 		})
