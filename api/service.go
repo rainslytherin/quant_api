@@ -82,7 +82,7 @@ func (s *Service) ServiceAddress() string {
 }
 
 // TODO: finish stop func
-func (s *Service) Stop() error {
+func (s *Service) Close() error {
 	s.Logger.Info("Stop HTTP Service.")
 	return nil
 }

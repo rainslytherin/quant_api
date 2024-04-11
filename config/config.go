@@ -43,6 +43,10 @@ type Config struct {
 		Password string `json:"password"`
 		Database string `json:"database"`
 	}
+	Backend map[string]struct {
+		Host string `json:"host"`
+		Port int    `json:"port"`
+	}
 }
 
 func (c *Config) ToMap() map[string]interface{} {

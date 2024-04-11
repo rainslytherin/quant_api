@@ -2,9 +2,11 @@ package database
 
 import (
 	"fmt"
+
+	"quant_api/config"
+
 	_ "github.com/go-sql-driver/mysql" // Import the MySQL driver
 	"github.com/jmoiron/sqlx"
-	"quant/config"
 )
 
 // use sqlx to connect to the database

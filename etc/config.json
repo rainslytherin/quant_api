@@ -4,7 +4,7 @@
   },
   "http": {
     "host": "127.0.0.1",
-    "port": 8080
+    "port": 4320
   },
   "database": {
     "host": "60.204.236.85",
@@ -12,5 +12,11 @@
     "username": "root",
     "password": "SecDev123!",
     "database": "config_center"
+  },
+  "backend": {
+    "quant_core": {
+      "host": "60.204.236.85",
+      "port": 8080
+    }
   }
 }
