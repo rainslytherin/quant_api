@@ -141,7 +141,6 @@ type StockConfig struct {
 
 // AddStockConfig
 func (s *Service) AddStockConfig(c *gin.Context) {
-	s.Logger.Info("AddStockConfig", "request", c.Request.Body)
 	scope := "stock"
 	// 添加股票配置
 	var stockConfig StockConfig
@@ -151,6 +150,8 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 		})
 		return
 	}
+
+	s.Logger.Info("AddStockConfig", "stockConfig", stockConfig)
 
 	if stockConfig.StockCode == "" {
 		c.JSON(400, gin.H{
@@ -182,7 +183,6 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 
 // UpdateStockConfig
 func (s *Service) UpdateStockConfig(c *gin.Context) {
-	s.Logger.Info("UpdateStockConfig", "request", c.Request.Body)
 	scope := "stock"
 	// 更新股票配置
 	var stockConfig StockConfig
@@ -192,6 +192,8 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 		})
 		return
 	}
+
+	s.Logger.Info("UpdateStockConfig", "stockConfig", stockConfig)
 
 	value, err := json.Marshal(stockConfig.Config)
 	if err != nil {
@@ -232,7 +234,6 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 
 // DeleteStockConfig
 func (s *Service) DeleteStockConfig(c *gin.Context) {
-	s.Logger.Info("DeleteStockConfig", "request", c.Request.Body)
 	scope := "stock"
 	// 删除股票配置
 	var stockConfig StockConfig
@@ -242,6 +243,7 @@ func (s *Service) DeleteStockConfig(c *gin.Context) {
 		})
 		return
 	}
+	s.Logger.Info("DeleteStockConfig", "stockConfig", stockConfig)
 
 	if stockConfig.StockCode == "" {
 		c.JSON(400, gin.H{
