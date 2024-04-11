@@ -45,6 +45,8 @@ func (s *Service) closeOut(c *gin.Context) {
 		return
 	}
 
+	s.Logger.Info("closeOut", "closeOut", closeOut)
+
 	if closeOut.StockCode == "" {
 		c.JSON(400, gin.H{
 			"message": "stock_code 不能为空",
@@ -80,7 +82,7 @@ func (s *Service) closeOut(c *gin.Context) {
 	resp, err := client.Do(req)
 	if err != nil {
 		c.JSON(400, gin.H{
-			"message": "请求失败",
+			"message": "请求失败: " + err.Error(),
 		})
 		return
 	}
