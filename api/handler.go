@@ -62,7 +62,7 @@ func (s *Service) closeOut(c *gin.Context) {
 	// with json body
 
 	// 设置请求地址和方法
-	url := fmt.Sprintf("http://%s/close_out", quantCoreBackend)
+	url := fmt.Sprintf("http://%s/stock/close_out", quantCoreBackend)
 	method := "POST"
 
 	// 创建 HTTP 请求
