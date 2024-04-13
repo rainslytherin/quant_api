@@ -332,7 +332,7 @@ type GlobalConfig struct {
 	Name       string `json:"name"  binding:"required"`
 	Config     struct {
 		Broker  string `json:"broker,omitempty"`
-	}
+	} `json:"config"`
 	UpdateUser string `json:"update_user"  binding:"required"`
 }
 
