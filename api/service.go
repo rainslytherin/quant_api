@@ -50,14 +50,14 @@ func (s *Service) Init() {
 
 func (s *Service) InitGin() {
 	s.Engine.Use(gin.Recovery())
+	s.Engine.Use(cors.Default())
+	s.Engine.Use(sloggin.New(s.Logger))
 	s.InitHandlers()
 	s.Server.Handler = s.Engine
-	s.Engine.Use(cors.Default())
 }
 
 func (s *Service) WithLogger(log *slog.Logger) {
 	s.Logger = log.With("service", "http")
-	s.Engine.Use(sloggin.New(s.Logger))
 }
 
 func (s *Service) Start() {

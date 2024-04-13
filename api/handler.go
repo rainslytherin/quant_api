@@ -26,8 +26,6 @@ func (s *Service) InitHandlers() {
 	s.GET("/global/configs", s.GetGlobalConfigs)
 	s.POST("/global/configs", s.AddGlobalConfig)
 	s.PUT("/global/configs", s.UpdateGlobalConfig)
-
-
 }
 
 func (s *Service) hello(c *gin.Context) {
@@ -329,9 +327,9 @@ func (s *Service) GetGlobalConfigs(c *gin.Context) {
 }
 
 type GlobalConfig struct {
-	Name       string `json:"name" binding:"required"`
-	Config     struct {
-		Broker  string `json:"broker,omitempty" binding:"required"`
+	Name   string `json:"name" binding:"required"`
+	Config struct {
+		Broker string `json:"broker,omitempty" binding:"required"`
 	} `json:"config"`
 	UpdateUser string `json:"update_user"  binding:"required"`
 }
