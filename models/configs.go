@@ -25,14 +25,14 @@ CREATE TABLE `configs` (
 */
 
 type Config struct {
-	ID           int        `db:"id"`
-	Scope        string     `db:"scope"`
-	Name         string     `db:"name"`
-	Value        JsonObject `db:"value"`
-	ChangedValue JsonObject `db:"changed_value"`
-	CreateTime   string     `db:"create_time"`
-	UpdateTime   string     `db:"update_time"`
-	UpdateUser   string     `db:"update_user"`
+	ID           int        `db:"id" json:"id"`
+	Scope        string     `db:"scope" json:"scope"`
+	Name         string     `db:"name" json:"name"`
+	Value        JsonObject `db:"value" json:"value"`
+	ChangedValue JsonObject `db:"changed_value" json:"changedValue"`
+	CreateTime   string     `db:"create_time" json:"createTime"`
+	UpdateTime   string     `db:"update_time" json:"updateTime"`
+	UpdateUser   string     `db:"update_user" json:"updateUser"`
 }
 
 type JsonObject map[string]interface{}
