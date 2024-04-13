@@ -29,11 +29,11 @@ type Config struct {
 	Scope        string     `db:"scope" json:"scope"`
 	Name         string     `db:"name" json:"name"`
 	Value        JsonObject `db:"value" json:"value"`
-	ChangedValue JsonObject `db:"changed_value" json:"changedValue"`
-	CreateTime   string     `db:"create_time" json:"createTime"`
-	UpdateTime   string     `db:"update_time" json:"updateTime"`
-	UpdateUser   string     `db:"update_user" json:"updateUser"`
-}
+	ChangedValue JsonObject `db:"changed_value" json:"changed_value"`
+	CreateTime   string     `db:"create_time" json:"create_time"`
+	UpdateTime   string     `db:"update_time" json:"update_time"`
+	UpdateUser   string     `db:"update_user" json:"update_user"`
+} // @name Config
 
 type JsonObject map[string]interface{}
 

@@ -136,7 +136,7 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 
 	// 返回所有股票配置
 	c.JSON(200, gin.H{
-		"stockConfigs": configs,
+		"stock_configs": configs,
 	})
 }
 
@@ -322,7 +322,7 @@ func (s *Service) GetGlobalConfigs(c *gin.Context) {
 
 	// 返回所有全局配置
 	c.JSON(200, gin.H{
-		"globalConfigs": configs,
+		"global_configs": configs,
 	})
 }
 
