@@ -23,6 +23,11 @@ func (s *Service) InitHandlers() {
 	s.PUT("/stock/configs", s.UpdateStockConfig)
 	s.DELETE("/stock/configs", s.DeleteStockConfig)
 
+	s.GET("/global/configs", s.GetGlobalConfigs)
+	s.POST("/global/configs", s.AddGlobalConfig)
+	s.PUT("/global/configs", s.UpdateGlobalConfig)
+
+
 }
 
 func (s *Service) hello(c *gin.Context) {
@@ -303,5 +308,148 @@ func (s *Service) DeleteStockConfig(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"message": "删除成功",
+	})
+}
+
+// GetGlobalConfigs
+func (s *Service) GetGlobalConfigs(c *gin.Context) {
+	scope := "global"
+	configs, err := models.GetConfigs(scope)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "获取配置失败: " + err.Error(),
+		})
+		return
+	}
+
+	// 返回所有全局配置
+	c.JSON(200, gin.H{
+		"globalConfigs": configs,
+	})
+}
+
+type GlobalConfig struct {
+	Name       string `json:"name"  binding:"required"`
+	Config     struct {
+		Broker  string `json:"broker,omitempty"`
+	}
+	UpdateUser string `json:"update_user"  binding:"required"`
+}
+
+// AddGlobalConfig
+func (s *Service) AddGlobalConfig(c *gin.Context) {
+	scope := "global"
+	// 添加全局配置
+	var globalConfig GlobalConfig
+	if err := c.ShouldBindJSON(&globalConfig); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
+	s.Logger.Info("AddGlobalConfig", "globalConfig", globalConfig)
+
+	if globalConfig.Name == "" {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
+	value, err := json.Marshal(globalConfig.Config)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数格式错误",
+		})
+		return
+	}
+
+	var valueObject map[string]interface{}
+
+	if err := json.Unmarshal(value, &valueObject); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数格式错误",
+		})
+		return
+	}
+
+	scopeConfig := models.NewConfig(scope, globalConfig.Name, valueObject, globalConfig.UpdateUser)
+	if err := scopeConfig.Create(); err != nil {
+		c.JSON(400, gin.H{
+			"message": "添加失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "添加成功",
+	})
+}
+
+// UpdateGlobalConfig
+func (s *Service) UpdateGlobalConfig(c *gin.Context) {
+	scope := "global"
+	// 更新全局配置
+	var globalConfig GlobalConfig
+	if err := c.ShouldBindJSON(&globalConfig); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
+	s.Logger.Info("UpdateGlobalConfig", "globalConfig", globalConfig)
+
+	value, err := json.Marshal(globalConfig.Config)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数格式错误",
+		})
+		return
+	}
+
+	var valueObject map[string]interface{}
+
+	if err := json.Unmarshal(value, &valueObject); err != nil {
+		c.JSON(400, gin.H{
+			"message": "参数格式错误",
+		})
+		return
+	}
+
+	if len(valueObject) == 0 {
+		c.JSON(400, gin.H{
+			"message": "参数错误",
+		})
+		return
+	}
+
+	oldConfig, err := models.GetConfig(scope, globalConfig.Name)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "获取原配置失败: " + err.Error(),
+		})
+		return
+	}
+
+	if err := oldConfig.MergeValue(valueObject); err != nil {
+		c.JSON(400, gin.H{
+			"message": "合并配置失败: " + err.Error(),
+		})
+		return
+	}
+
+	oldConfig.UpdateUser = globalConfig.UpdateUser
+
+	if err := oldConfig.Save(); err != nil {
+		c.JSON(400, gin.H{
+			"message": "保存配置失败: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message": "更新成功",
 	})
 }
