@@ -1,6 +1,6 @@
 {
   "log": {
-    "level": "info"
+    "level": "debug"
   },
   "http": {
     "host": "0.0.0.0",
@@ -15,7 +15,7 @@
   },
   "backend": {
     "quant_core": {
-      "host": "121.37.182.188",
+      "host": "192.168.0.151",
       "port": 4321
     }
   }
