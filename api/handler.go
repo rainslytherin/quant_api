@@ -78,7 +78,7 @@ func (s *Service) closeOut(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// 创建 HTTP 请求
 	req, err := http.NewRequest(method, url, bytes.NewReader(jsonData))
 	if err != nil {
@@ -131,7 +131,7 @@ func (s *Service) closeOut(c *gin.Context) {
 
 	if resp.StatusCode != 200 {
 		c.JSON(resp.StatusCode, gin.H{
-			"message": "请求失败: " + closeOutResponse.Message,
+			"message": "计算模块处理异常， " + closeOutResponse.Message,
 		})
 		return
 
