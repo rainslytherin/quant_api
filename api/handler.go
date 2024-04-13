@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -69,8 +70,17 @@ func (s *Service) closeOut(c *gin.Context) {
 	url := fmt.Sprintf("http://%s/stock/close_out", quantCoreBackend)
 	method := "POST"
 
+	// 设置请求体
+	jsonData, err := json.Marshal(closeOut)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "序列化请求体失败",
+		})
+		return
+	}
+	
 	// 创建 HTTP 请求
-	req, err := http.NewRequest(method, url, c.Request.Body)
+	req, err := http.NewRequest(method, url, bytes.NewReader(jsonData))
 	if err != nil {
 		c.JSON(400, gin.H{
 			"message": "创建请求失败",
