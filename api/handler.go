@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"quant_api/models"
 
@@ -81,7 +82,9 @@ func (s *Service) closeOut(c *gin.Context) {
 	req.Header.Set("Content-Type", "application/json")
 
 	// 创建 HTTP 客户端并发送请求
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 3 * time.Second,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		c.JSON(400, gin.H{
@@ -102,7 +105,7 @@ func (s *Service) closeOut(c *gin.Context) {
 
 	// 反序列化结果
 	type CloseOutResponse struct {
-		StockPrice float64 `json:"stockPrice"`
+		StockPrice float64 `json:"price"`
 		Qty        int     `json:"qty"`
 		Message    string  `json:"message"`
 	}
@@ -116,10 +119,18 @@ func (s *Service) closeOut(c *gin.Context) {
 		return
 	}
 
+	if resp.StatusCode != 200 {
+		c.JSON(resp.StatusCode, gin.H{
+			"message": "请求失败: " + closeOutResponse.Message,
+		})
+		return
+
+	}
+
 	c.JSON(200, gin.H{
-		"stockPrice": closeOutResponse.StockPrice,
-		"qty":        closeOutResponse.Qty,
-		"message":    "执行完成",
+		"price":   closeOutResponse.StockPrice,
+		"qty":     closeOutResponse.Qty,
+		"message": closeOutResponse.Message,
 	})
 }
 
