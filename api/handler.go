@@ -329,9 +329,9 @@ func (s *Service) GetGlobalConfigs(c *gin.Context) {
 }
 
 type GlobalConfig struct {
-	Name       string `json:"name"  binding:"required"`
+	Name       string `json:"name" binding:"required"`
 	Config     struct {
-		Broker  string `json:"broker,omitempty"`
+		Broker  string `json:"broker,omitempty" binding:"required"`
 	} `json:"config"`
 	UpdateUser string `json:"update_user"  binding:"required"`
 }
