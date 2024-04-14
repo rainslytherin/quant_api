@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -50,10 +51,21 @@ func (s *Service) Init() {
 
 func (s *Service) InitGin() {
 	s.Engine.Use(gin.Recovery())
-	s.Engine.Use(cors.Default())
 	s.Engine.Use(sloggin.New(s.Logger))
+	s.InitCors()
 	s.InitHandlers()
 	s.Server.Handler = s.Engine
+}
+
+func (s *Service) InitCors() {
+	s.Engine.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://localhost:8080", "http://121.37.182.188:8080"},
+		AllowMethods:     []string{"GET", "HEAD", "DELETE", "OPTIONS", "POST", "PUT", "PATCH"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 }
 
 func (s *Service) WithLogger(log *slog.Logger) {
