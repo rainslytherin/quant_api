@@ -59,7 +59,7 @@ func (s *Service) InitGin() {
 
 func (s *Service) InitCors() {
 	s.Engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://localhost:8080", "http://121.37.182.188:8080"},
+		AllowOrigins:     []string{"https://localhost:8080", "http://121.37.182.188:8080", "http://121.37.182.188"},
 		AllowMethods:     []string{"GET", "HEAD", "DELETE", "OPTIONS", "POST", "PUT", "PATCH"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
