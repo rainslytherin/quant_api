@@ -41,21 +41,25 @@ type CloseOut struct {
 	StockCode string `json:"stock_code"  binding:"required"`
 }
 
+func SetHTTPResponse(c *gin.Context, code int, data interface{}, message string) {
+	c.JSON(200, gin.H{
+		"code":    code,
+		"data":    data,
+		"message": message,
+	})
+}
+
 func (s *Service) closeOut(c *gin.Context) {
 	var closeOut CloseOut
 	if err := c.ShouldBindJSON(&closeOut); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
 	s.Logger.Info("closeOut", "closeOut", closeOut)
 
 	if closeOut.StockCode == "" {
-		c.JSON(400, gin.H{
-			"message": "stock_code 不能为空",
-		})
+		SetHTTPResponse(c, -1, nil, "stock_code 不能为空")
 		return
 	}
 
@@ -73,18 +77,14 @@ func (s *Service) closeOut(c *gin.Context) {
 	// 设置请求体
 	jsonData, err := json.Marshal(closeOut)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "序列化请求体失败",
-		})
+		SetHTTPResponse(c, -1, nil, "序列化请求体失败")
 		return
 	}
 
 	// 创建 HTTP 请求
 	req, err := http.NewRequest(method, url, bytes.NewReader(jsonData))
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "创建请求失败",
-		})
+		SetHTTPResponse(c, -1, nil, "创建请求失败")
 		return
 	}
 
@@ -97,9 +97,7 @@ func (s *Service) closeOut(c *gin.Context) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "请求失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "请求失败")
 		return
 	}
 	defer resp.Body.Close()
@@ -107,9 +105,7 @@ func (s *Service) closeOut(c *gin.Context) {
 	// 解析响应
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "解析响应失败",
-		})
+		SetHTTPResponse(c, -1, nil, "解析响应失败")
 		return
 	}
 
@@ -123,25 +119,18 @@ func (s *Service) closeOut(c *gin.Context) {
 	var closeOutResponse CloseOutResponse
 
 	if err := json.Unmarshal(body, &closeOutResponse); err != nil {
-		c.JSON(400, gin.H{
-			"message": "反序列化失败",
-		})
+		SetHTTPResponse(c, -1, nil, "反序列化失败")
 		return
 	}
 
 	if resp.StatusCode != 200 {
-		c.JSON(resp.StatusCode, gin.H{
-			"message": "计算模块处理异常， " + closeOutResponse.Message,
-		})
+		SetHTTPResponse(c, -1, nil, "计算模块处理异常， "+closeOutResponse.Message)
 		return
 
 	}
 
-	c.JSON(200, gin.H{
-		"price":   closeOutResponse.StockPrice,
-		"qty":     closeOutResponse.Qty,
-		"message": closeOutResponse.Message,
-	})
+	SetHTTPResponse(c, 0, closeOutResponse, "执行完成")
+	return
 }
 
 // GetStockConfigs
@@ -149,16 +138,12 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 	scope := "stock"
 	configs, err := models.GetConfigs(scope)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "获取配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "获取配置失败: "+err.Error())
 		return
 	}
 
 	// 返回所有股票配置
-	c.JSON(200, gin.H{
-		"stock_configs": configs,
-	})
+	SetHTTPResponse(c, 0, configs, "查询成功")
 }
 
 type StockConfig struct {
@@ -178,49 +163,37 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 	// 添加股票配置
 	var stockConfig StockConfig
 	if err := c.ShouldBindJSON(&stockConfig); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
 	s.Logger.Info("AddStockConfig", "stockConfig", stockConfig)
 
 	if stockConfig.StockCode == "" {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "stock code 不能为空")
 		return
 	}
 
 	value, err := json.Marshal(stockConfig.Config)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	var valueObject map[string]interface{}
 
 	if err := json.Unmarshal(value, &valueObject); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	scopeConfig := models.NewConfig(scope, stockConfig.StockCode, valueObject, stockConfig.UpdateUser)
 	if err := scopeConfig.Create(); err != nil {
-		c.JSON(400, gin.H{
-			"message": "添加失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "添加失败: "+err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"message": "添加成功",
-	})
+	SetHTTPResponse(c, 0, scopeConfig, "添加成功")
 }
 
 // UpdateStockConfig
@@ -229,9 +202,7 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 	// 更新股票配置
 	var stockConfig StockConfig
 	if err := c.ShouldBindJSON(&stockConfig); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
@@ -239,55 +210,41 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 
 	value, err := json.Marshal(stockConfig.Config)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	var valueObject map[string]interface{}
 
 	if err := json.Unmarshal(value, &valueObject); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	if len(valueObject) == 0 {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
 	oldConfig, err := models.GetConfig(scope, stockConfig.StockCode)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "获取原配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "获取原配置失败: "+err.Error())
 		return
 	}
 
 	if err := oldConfig.MergeValue(valueObject); err != nil {
-		c.JSON(400, gin.H{
-			"message": "合并配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "合并配置失败: "+err.Error())
 		return
 	}
 
 	oldConfig.UpdateUser = stockConfig.UpdateUser
 
 	if err := oldConfig.Save(); err != nil {
-		c.JSON(400, gin.H{
-			"message": "保存配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "保存配置失败: "+err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"message": "更新成功",
-	})
+	SetHTTPResponse(c, 0, oldConfig, "更新成功")
 }
 
 // DeleteStockConfig
@@ -296,38 +253,28 @@ func (s *Service) DeleteStockConfig(c *gin.Context) {
 	// 删除股票配置
 	var stockConfig StockConfig
 	if err := c.ShouldBindJSON(&stockConfig); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 	s.Logger.Info("DeleteStockConfig", "stockConfig", stockConfig)
 
 	if stockConfig.StockCode == "" {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "stock code 不能为空")
 		return
 	}
 
 	oldConfig, err := models.GetConfig(scope, stockConfig.StockCode)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "获取原配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "获取原配置失败: "+err.Error())
 		return
 	}
 
 	if err := oldConfig.Delete(); err != nil {
-		c.JSON(400, gin.H{
-			"message": "删除失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "删除失败: "+err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"message": "删除成功",
-	})
+	SetHTTPResponse(c, 0, oldConfig, "删除成功")
 }
 
 // GetGlobalConfigs
@@ -335,16 +282,12 @@ func (s *Service) GetGlobalConfigs(c *gin.Context) {
 	scope := "global"
 	configs, err := models.GetConfigs(scope)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "获取配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "获取配置失败: "+err.Error())
 		return
 	}
 
 	// 返回所有全局配置
-	c.JSON(200, gin.H{
-		"global_configs": configs,
-	})
+	SetHTTPResponse(c, 0, configs, "查询成功")
 }
 
 type GlobalConfig struct {
@@ -361,49 +304,37 @@ func (s *Service) AddGlobalConfig(c *gin.Context) {
 	// 添加全局配置
 	var globalConfig GlobalConfig
 	if err := c.ShouldBindJSON(&globalConfig); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
 	s.Logger.Info("AddGlobalConfig", "globalConfig", globalConfig)
 
 	if globalConfig.Name == "" {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "name 不能为空")
 		return
 	}
 
 	value, err := json.Marshal(globalConfig.Config)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	var valueObject map[string]interface{}
 
 	if err := json.Unmarshal(value, &valueObject); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	scopeConfig := models.NewConfig(scope, globalConfig.Name, valueObject, globalConfig.UpdateUser)
 	if err := scopeConfig.Create(); err != nil {
-		c.JSON(400, gin.H{
-			"message": "添加失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "添加失败: "+err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"message": "添加成功",
-	})
+	SetHTTPResponse(c, 0, scopeConfig, "添加成功")
 }
 
 // UpdateGlobalConfig
@@ -412,9 +343,7 @@ func (s *Service) UpdateGlobalConfig(c *gin.Context) {
 	// 更新全局配置
 	var globalConfig GlobalConfig
 	if err := c.ShouldBindJSON(&globalConfig); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
@@ -422,53 +351,39 @@ func (s *Service) UpdateGlobalConfig(c *gin.Context) {
 
 	value, err := json.Marshal(globalConfig.Config)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	var valueObject map[string]interface{}
 
 	if err := json.Unmarshal(value, &valueObject); err != nil {
-		c.JSON(400, gin.H{
-			"message": "参数格式错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数格式错误")
 		return
 	}
 
 	if len(valueObject) == 0 {
-		c.JSON(400, gin.H{
-			"message": "参数错误",
-		})
+		SetHTTPResponse(c, -1, nil, "参数错误")
 		return
 	}
 
 	oldConfig, err := models.GetConfig(scope, globalConfig.Name)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"message": "获取原配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "获取原配置失败: "+err.Error())
 		return
 	}
 
 	if err := oldConfig.MergeValue(valueObject); err != nil {
-		c.JSON(400, gin.H{
-			"message": "合并配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "合并配置失败: "+err.Error())
 		return
 	}
 
 	oldConfig.UpdateUser = globalConfig.UpdateUser
 
 	if err := oldConfig.Save(); err != nil {
-		c.JSON(400, gin.H{
-			"message": "保存配置失败: " + err.Error(),
-		})
+		SetHTTPResponse(c, -1, nil, "保存配置失败: "+err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"message": "更新成功",
-	})
+	SetHTTPResponse(c, 0, oldConfig, "更新成功")
 }
