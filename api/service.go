@@ -5,9 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
 )
@@ -58,14 +56,34 @@ func (s *Service) InitGin() {
 }
 
 func (s *Service) InitCors() {
-	s.Engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8080", "http://121.37.182.188:8080", "http://121.37.182.188"},
-		AllowMethods:     []string{"GET", "HEAD", "DELETE", "OPTIONS", "POST", "PUT", "PATCH"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	//s.Engine.Use(cors.New(cors.Config{
+	//	AllowOrigins:     []string{"http://localhost:8080", "http://121.37.182.188:8080", "http://121.37.182.188"},
+	//	AllowMethods:     []string{"GET", "HEAD", "DELETE", "OPTIONS", "POST", "PUT", "PATCH"},
+	//	AllowHeaders:     []string{"Origin"},
+	//	ExposeHeaders:    []string{"Content-Length"},
+	//	AllowCredentials: true,
+	//	MaxAge:           12 * time.Hour,
+	//}))
+	s.Engine.Use(Cors())
+}
+
+func Cors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		method := c.Request.Method
+
+		c.Header("Access-Control-Allow-Origin", "http://localhost:8080, http://121.37.182.188, http://121.37.182.188:8080")
+		c.Header("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
+		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
+		c.Header("Access-Control-Allow-Credentials", "true")
+
+		//放行所有OPTIONS方法
+		if method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+		}
+		// 处理请求
+		c.Next()
+	}
 }
 
 func (s *Service) WithLogger(log *slog.Logger) {
