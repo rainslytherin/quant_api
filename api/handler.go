@@ -42,6 +42,9 @@ type CloseOut struct {
 }
 
 func SetHTTPResponse(c *gin.Context, code int, data interface{}, message string) {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
 	c.JSON(200, gin.H{
 		"code":    code,
 		"data":    data,
@@ -143,7 +146,9 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 	}
 
 	// 返回所有股票配置
-	SetHTTPResponse(c, 0, configs, "查询成功")
+	data := make(map[string]interface{})
+	data["configs"] = configs
+	SetHTTPResponse(c, 0, data, "查询成功")
 }
 
 type StockConfig struct {
@@ -193,7 +198,9 @@ func (s *Service) AddStockConfig(c *gin.Context) {
 		return
 	}
 
-	SetHTTPResponse(c, 0, scopeConfig, "添加成功")
+	data := make(map[string]interface{})
+	data["config"] = scopeConfig
+	SetHTTPResponse(c, 0, data, "添加成功")
 }
 
 // UpdateStockConfig
@@ -244,7 +251,9 @@ func (s *Service) UpdateStockConfig(c *gin.Context) {
 		return
 	}
 
-	SetHTTPResponse(c, 0, oldConfig, "更新成功")
+	data := make(map[string]interface{})
+	data["config"] = oldConfig
+	SetHTTPResponse(c, 0, data, "更新成功")
 }
 
 // DeleteStockConfig
@@ -274,7 +283,7 @@ func (s *Service) DeleteStockConfig(c *gin.Context) {
 		return
 	}
 
-	SetHTTPResponse(c, 0, oldConfig, "删除成功")
+	SetHTTPResponse(c, 0, nil, "删除成功")
 }
 
 // GetGlobalConfigs
@@ -287,7 +296,9 @@ func (s *Service) GetGlobalConfigs(c *gin.Context) {
 	}
 
 	// 返回所有全局配置
-	SetHTTPResponse(c, 0, configs, "查询成功")
+	data := make(map[string]interface{})
+	data["configs"] = configs
+	SetHTTPResponse(c, 0, data, "查询成功")
 }
 
 type GlobalConfig struct {
@@ -334,7 +345,9 @@ func (s *Service) AddGlobalConfig(c *gin.Context) {
 		return
 	}
 
-	SetHTTPResponse(c, 0, scopeConfig, "添加成功")
+	data := make(map[string]interface{})
+	data["config"] = scopeConfig
+	SetHTTPResponse(c, 0, data, "添加成功")
 }
 
 // UpdateGlobalConfig
@@ -385,5 +398,7 @@ func (s *Service) UpdateGlobalConfig(c *gin.Context) {
 		return
 	}
 
-	SetHTTPResponse(c, 0, oldConfig, "更新成功")
+	data := make(map[string]interface{})
+	data["config"] = oldConfig
+	SetHTTPResponse(c, 0, data, "更新成功")
 }
