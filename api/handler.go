@@ -100,7 +100,8 @@ func (s *Service) closeOut(c *gin.Context) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		SetHTTPResponse(c, -1, nil, "请求失败")
+		msg := fmt.Sprintf("请求失败: %s", err.Error())
+		SetHTTPResponse(c, -1, nil, msg)
 		return
 	}
 	defer resp.Body.Close()
