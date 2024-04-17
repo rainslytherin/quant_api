@@ -16,7 +16,7 @@
   "backend": {
     "quant_core": {
       "host": "192.168.0.151",
-      "port": 4321
+      "port": 4322
     }
   }
 }
