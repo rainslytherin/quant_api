@@ -154,10 +154,10 @@ func (s *Service) GetStockConfigs(c *gin.Context) {
 type StockConfig struct {
 	StockCode string `json:"stock_code"  binding:"required"`
 	Config    struct {
-		ProdStatus bool    `json:"prod_status,omitempty"`
-		PreStatus  bool    `json:"pre_status,omitempty"`
-		UpLimit    float64 `json:"up_limit,omitempty"`
-		LowLimit   float64 `json:"low_limit,omitempty"`
+		ProdStatus *bool    `json:"prod_status,omitempty"`
+		PreStatus  *bool    `json:"pre_status,omitempty"`
+		UpLimit    *float64 `json:"up_limit,omitempty"`
+		LowLimit   *float64 `json:"low_limit,omitempty"`
 	} `json:"config"`
 	UpdateUser string `json:"update_user"  binding:"required"`
 }

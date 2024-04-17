@@ -87,6 +87,12 @@ func MergeJson(oldValueByte, newValueByte []byte) ([]byte, error) {
 	return mergedValue, nil
 }
 
+func PrintMap(m map[string]interface{}) {
+	for k, v := range m {
+		fmt.Println(k, v)
+	}
+}
+
 func MergeObject(oldObj, newObj map[string]interface{}) map[string]interface{} {
 	for k, v := range newObj {
 		oldObj[k] = v
