@@ -109,7 +109,7 @@ func (s *Service) closeOut(c *gin.Context) {
 	// 解析响应
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		SetHTTPResponse(c, -1, nil, "解析响应失败")
+		SetHTTPResponse(c, -1, nil, "解析响应失败:"+err.Error())
 		return
 	}
 
@@ -123,7 +123,7 @@ func (s *Service) closeOut(c *gin.Context) {
 	var closeOutResponse CloseOutResponse
 
 	if err := json.Unmarshal(body, &closeOutResponse); err != nil {
-		SetHTTPResponse(c, -1, nil, "反序列化失败")
+		SetHTTPResponse(c, -1, nil, "反序列化失败:"+err.Error())
 		return
 	}
 
