@@ -52,6 +52,19 @@ func SetHTTPResponse(c *gin.Context, code int, data interface{}, message string)
 	})
 }
 
+// 反序列化结果
+type CloseOutResponse struct {
+	Data    CloseOutInfo `json:"data"`
+	Message string       `json:"message"`
+}
+
+type CloseOutInfo struct {
+	LastPrice          float64     `json:"price"`
+	CanceledEnterTasks []int       `json:"canceled_enter_tasks"`
+	CanceledExitTasks  []int       `json:"canceled_exit_tasks"`
+	CloseOutQty        map[int]int `json:"close_out_qty"`
+}
+
 func (s *Service) closeOut(c *gin.Context) {
 	var closeOut CloseOut
 	if err := c.ShouldBindJSON(&closeOut); err != nil {
@@ -111,13 +124,6 @@ func (s *Service) closeOut(c *gin.Context) {
 	if err != nil {
 		SetHTTPResponse(c, -1, nil, "解析响应失败:"+err.Error())
 		return
-	}
-
-	// 反序列化结果
-	type CloseOutResponse struct {
-		StockPrice float64 `json:"price"`
-		Qty        int     `json:"qty"`
-		Message    string  `json:"message"`
 	}
 
 	var closeOutResponse CloseOutResponse
