@@ -139,7 +139,7 @@ func (s *Service) closeOut(c *gin.Context) {
 
 	}
 
-	SetHTTPResponse(c, 0, closeOutResponse, "执行完成")
+	SetHTTPResponse(c, 0, closeOutResponse.Data, closeOutResponse.Message)
 	return
 }
 
