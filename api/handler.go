@@ -63,6 +63,7 @@ type CloseOutInfo struct {
 	CanceledEnterTasks []int       `json:"canceled_enter_tasks"`
 	CanceledExitTasks  []int       `json:"canceled_exit_tasks"`
 	CloseOutQty        map[int]int `json:"close_out_qty"`
+	TotalQty           int         `json:"total_qty"`
 }
 
 func (s *Service) closeOut(c *gin.Context) {
