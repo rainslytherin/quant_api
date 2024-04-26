@@ -189,3 +189,15 @@ func GetConfigs(scope string) ([]*Config, error) {
 
 	return configs, err
 }
+
+func GetConfigsAfterTime(timeStamp int64) ([]*Config, error) {
+	db, err := database.GetGlobalDB()
+	if err != nil {
+		return nil, err
+	}
+
+	configs := make([]*Config, 0)
+	err = db.Select(&configs, "SELECT * FROM configs WHERE update_time > ?", timeStamp)
+
+	return configs, err
+}
