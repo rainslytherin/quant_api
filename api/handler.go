@@ -29,10 +29,8 @@ func (s *Service) InitHandlers() {
 	s.POST("/global/configs", s.AddGlobalConfig)
 	s.PUT("/global/configs", s.UpdateGlobalConfig)
 
-	s.GET("/all/configs", s.GetAllConfigs)
-
-	s.GET("/sync/status", s.GetSyncStatus)
-	s.POST("/sync/done", s.StartDone)
+	s.GET("/config_center/configs", s.ConfigCenterGetConfigs)
+	s.GET("/config_center/status", s.ConfigCenterGetStatus)
 }
 
 func (s *Service) hello(c *gin.Context) {
@@ -147,38 +145,6 @@ func (s *Service) closeOut(c *gin.Context) {
 
 	SetHTTPResponse(c, 0, closeOutResponse.Data, closeOutResponse.Message)
 	return
-}
-
-type SyncParams struct {
-	ClientID string `json:"client_id"`
-}
-
-func (s *Service) GetAllConfigs(c *gin.Context) {
-	// get client_id from query params
-	var param SyncParams
-	if err := c.ShouldBindQuery(&param); err != nil {
-		SetHTTPResponse(c, -1, nil, "参数错误")
-		return
-	}
-
-	syncStatus, err := models.LoadSyncStatus(param.ClientID)
-	if err != nil {
-		SetHTTPResponse(c, -1, nil, "获取同步状态失败: "+err.Error())
-		return
-	}
-
-	configs, err := models.GetConfigsAfterTime(syncStatus.UpdateTime)
-	if err != nil {
-		SetHTTPResponse(c, -1, nil, "获取配置失败: "+err.Error())
-		return
-	}
-
-	// 返回所有配置
-	data := make(map[string]interface{})
-	data["configs"] = configs
-
-	SetHTTPResponse(c, 0, data, "查询成功")
-
 }
 
 // GetStockConfigs
@@ -446,40 +412,4 @@ func (s *Service) UpdateGlobalConfig(c *gin.Context) {
 	data := make(map[string]interface{})
 	data["config"] = oldConfig
 	SetHTTPResponse(c, 0, data, "更新成功")
-}
-
-// GetSyncStatus
-func (s *Service) GetSyncStatus(c *gin.Context) {
-	syncStatus, err := models.LoadAllSyncStatus()
-	if err != nil {
-		SetHTTPResponse(c, -1, nil, "获取同步状态失败: "+err.Error())
-		return
-	}
-
-	data := make(map[string]interface{})
-	data["sync_status"] = syncStatus
-
-	SetHTTPResponse(c, 0, data, "查询成功")
-}
-
-func (s *Service) StartDone(c *gin.Context) {
-	var param SyncParams
-	if err := c.ShouldBindJSON(&param); err != nil {
-		SetHTTPResponse(c, -1, nil, "参数错误")
-		return
-	}
-
-	syncStatus, err := models.LoadSyncStatus(param.ClientID)
-	if err != nil {
-		SetHTTPResponse(c, -1, nil, "获取同步状态失败: "+err.Error())
-		return
-	}
-
-	syncStatus.UpdateTime = time.Now().Unix()
-	if err := syncStatus.Save(); err != nil {
-		SetHTTPResponse(c, -1, nil, "保存同步状态失败: "+err.Error())
-		return
-	}
-
-	SetHTTPResponse(c, 0, nil, "同步完成")
 }
